@@ -1,70 +1,94 @@
-# Getting Started with Create React App
+```
+import { useEffect, useState } from "react";
+import "./App.css"
+import logos from "./logos";
+import { folders } from "./logos";
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+function App() {
 
-In the project directory, you can run:
+  const [list, setList] = useState([])
+  const [dragInfo, setDragInfo] = useState({
+    oldFolder: "",
+    newFolder: "",
+    item: {}
+  })
 
-### `npm start`
+  const allowDrop = (ev) => {
+    ev.preventDefault();
+  }
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+  const drag = (ev, folderName, item) => {
+    setDragInfo({ ...dragInfo, oldFolder: folderName, item: item })
+  }
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  const drop = (ev, folderName) => {
+    ev.preventDefault();
+    setDragInfo({ ...dragInfo, newFolder: folderName })
 
-### `npm test`
+    const _list = list?.map((item) => {
+      if (dragInfo.oldFolder === folderName) {
+        console.log("Dropped inside its old folder")
+        return item
+      }
+      else if (item.folderName === dragInfo.oldFolder) {
+        console.log("removing from old folder")
+        const index = item.logos.findIndex(i => i == dragInfo.item)
+        item.logos.splice(index, 1)
+        return item
+      }
+      else if (item.folderName === folderName) {
+        console.log("adding inside new folder")
+        item.logos.push(dragInfo.item)
+        return item
+      }
+      else {
+        console.log("no action happenned")
+        return item
+      }
+    })
+    setList([..._list])
+  }
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  useEffect(() => {
+    const _folders = folders.map((folder) => {
+      const _logos = logos.filter((logo, index) => {
+        if (logo.folderName === folder) {
+          return logo
+        }
+      })
+      return { folderName: folder, logos: _logos }
+    })
+    setList([..._folders])
+  }, [])
 
-### `npm run build`
+  return (
+    <div className="App">
+      <div style={{ display: "flex" }}>
+        {list?.map((item, index) =>
+          <div key={index} style={{ margin: 20 }}>
+            <h1>{item.folderName}</h1>
+            <div className="container" onDrop={(e) => drop(e, item.folderName)} onDragOver={(e) => allowDrop(e)}>
+              {item.logos.map((logo, index) =>
+                <div
+                  key={index}
+                  className="item"
+                  id={logo.title}
+                  data-folder={item.folderName}
+                  data-item={logo.companyName}
+                  draggable="true"
+                  onDragStart={(e) => drag(e, item.folderName, logo)}
+                >
+                  <img src={logo.image} width="336" height="69" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default App;
+```
